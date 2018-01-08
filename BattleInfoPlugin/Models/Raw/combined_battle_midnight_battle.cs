@@ -8,8 +8,10 @@
         public int api_deck_id { get; set; }
         public int[] api_ship_ke { get; set; }
         public int[] api_ship_lv { get; set; }
-        public int[] api_nowhps { get; set; }
-        public int[] api_maxhps { get; set; }
+        public int[] api_e_nowhps { get; set; }
+        public int[] api_e_maxhps { get; set; }
+        public int[] api_f_nowhps { get; set; }
+        public int[] api_f_maxhps { get; set; }
         public int[] api_nowhps_combined { get; set; }
         public int[] api_maxhps_combined { get; set; }
         public int[][] api_eSlot { get; set; }

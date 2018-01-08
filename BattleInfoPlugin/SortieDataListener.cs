@@ -37,10 +37,14 @@ namespace BattleInfoPlugin
 
 
             proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_map/start")
-                .TryParse<map_start_next>().Subscribe(x => this.Update(x.Data));
+                .TryParse<map_start>().Subscribe(x =>
+                {
+                    this.Update(x.Data);
+                    Models.Repositories.Master.Current.Update(x.Data);
+                });
 
             proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_map/next")
-                .TryParse<map_start_next>().Subscribe(x => this.Update(x.Data));
+                .TryParse<map_next>().Subscribe(x => this.Update(x.Data));
 
             proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_sortie/ld_airbattle")
                 .TryParse<sortie_ld_airbattle>().Subscribe(x => this.Update(x.Data));
@@ -70,7 +74,7 @@ namespace BattleInfoPlugin
                 data.api_eKyouka,
                 data.api_eParam,
                 data.api_ship_lv,
-                data.api_maxhps);
+                data.api_e_maxhps);
             this.provider.UpdateBattleTypes(data);
         }
 
@@ -78,8 +82,8 @@ namespace BattleInfoPlugin
 
         #region StartNext
 
-        private void Update(map_start_next startNext)
-            => this.provider.UpdateMapData(startNext);
+        private void Update(map_next next)
+            => this.provider.UpdateMapData(next);
 
         private void Update(battle_result result)
             => this.provider.UpdateEnemyName(result);

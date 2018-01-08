@@ -35,6 +35,7 @@ namespace BattleInfoPlugin.Models.Raw
         public int api_get_eventflag { get; set; }
         public int api_escape_flag { get; set; }
         public Api_Escape api_escape { get; set; }
+        public int api_mapcell_incentive { get; set; }
     }
 
     public class Api_Enemy_Info

@@ -20,11 +20,11 @@ namespace BattleInfoPlugin.Models.Raw
         #region 砲撃
 
         public static FleetDamages GetFriendDamages(this Hougeki hougeki)
-            => hougeki?.api_damage?.GetFriendDamages(hougeki.api_df_list)
+            => hougeki?.api_damage?.GetFriendDamages(hougeki.api_df_list, hougeki.api_at_eflag)
                ?? defaultValue;
 
         public static FleetDamages GetEnemyDamages(this Hougeki hougeki)
-            => hougeki?.api_damage?.GetEnemyDamages(hougeki.api_df_list)
+            => hougeki?.api_damage?.GetEnemyDamages(hougeki.api_df_list, hougeki.api_at_eflag)
                ?? defaultValue;
 
         #endregion
@@ -32,11 +32,11 @@ namespace BattleInfoPlugin.Models.Raw
         #region 夜戦
 
         public static FleetDamages GetFriendDamages(this Midnight_Hougeki hougeki)
-            => hougeki?.api_damage?.GetFriendDamages(hougeki.api_df_list)
+            => hougeki?.api_damage?.GetFriendDamages(hougeki.api_df_list, hougeki.api_at_eflag)
                ?? defaultValue;
 
         public static FleetDamages GetEnemyDamages(this Midnight_Hougeki hougeki)
-            => hougeki?.api_damage?.GetEnemyDamages(hougeki.api_df_list)
+            => hougeki?.api_damage?.GetEnemyDamages(hougeki.api_df_list, hougeki.api_at_eflag)
                ?? defaultValue;
 
         #endregion
@@ -124,7 +124,7 @@ namespace BattleInfoPlugin.Models.Raw
         /// <returns></returns>
         public static FleetDamages GetDamages(this double[] damages)
             => damages
-                .GetFriendData() //敵味方共通
+                .GetFriendData(0) //敵味方共通
                 .Select(Convert.ToInt32)
                 .ToArray()
                 .ToFleetDamages();
@@ -137,11 +137,10 @@ namespace BattleInfoPlugin.Models.Raw
         /// <param name="damages">api_damage</param>
         /// <param name="df_list">api_df_list</param>
         /// <returns></returns>
-        public static FleetDamages GetFriendDamages(this object[] damages, object[] df_list)
+        public static FleetDamages GetFriendDamages(this object[] damages, object[] df_list, int[] at_eflag)
             => damages
-                .ToIntArray()
-                .ToSortedDamages(df_list.ToIntArray())
-                .GetFriendData(0)
+                .ToIntArraySum()
+                .ToFriendDamages(df_list.ToIntArray(), at_eflag)
                 .ToFleetDamages();
 
         /// <summary>
@@ -150,47 +149,79 @@ namespace BattleInfoPlugin.Models.Raw
         /// <param name="damages">api_damage</param>
         /// <param name="df_list">api_df_list</param>
         /// <returns></returns>
-        public static FleetDamages GetEnemyDamages(this object[] damages, object[] df_list)
+        public static FleetDamages GetEnemyDamages(this object[] damages, object[] df_list, int[] at_eflag)
             => damages
-                .ToIntArray()
-                .ToSortedDamages(df_list.ToIntArray())
-                .GetEnemyData(0)
+                .ToIntArraySum()
+                .ToEnemyDamages(df_list.ToIntArray(), at_eflag)
                 .ToFleetDamages();
 
         /// <summary>
         /// 砲撃戦ダメージリストint配列化
-        /// 弾着観測射撃データはフラット化する
-        /// api_df_listも同様の型なので流用可能
+        /// 弾着観測射撃/連撃データは合計する
         /// </summary>
         /// <param name="damages">api_damage</param>
         /// <returns></returns>
-        private static int[] ToIntArray(this object[] damages)
+        private static int[] ToIntArraySum(this object[] damages)
             => damages
                 .Where(x => x is Array)
                 .Select(x => ((Array) x).Cast<object>())
-                .SelectMany(x => x.Select(Convert.ToInt32))
+                .Select(x => x.Select(Convert.ToInt32).Sum())
+                .ToArray();
+
+        /// <summary>
+        /// api_df_list int配列化
+        /// 弾着観測射撃/連撃データは先頭要素を取得する
+        /// </summary>
+        /// <param name="dflist">api_df_list</param>
+        /// <returns></returns>
+        private static int[] ToIntArray(this object[] dflist)
+            => dflist
+                .Where(x => x is Array)
+                .Select(x => ((Array)x).Cast<object>())
+                .Select(x => x.Select(Convert.ToInt32).ToArray().SafeAccess(0, 0))
                 .ToArray();
 
         /// <summary>
         /// フラット化したapi_damageとapi_df_listを元に
-        /// 自軍6隻＋敵軍6隻の長さ12のダメージ合計配列を作成
+        /// api_at_eflagに基づき自軍6隻または敵軍6隻に
+        /// 限定した長さ6のダメージ合計配列を作成
         /// </summary>
         /// <param name="damages">api_damage</param>
         /// <param name="dfList">api_df_list</param>
+        /// <param name="efList">api_at_eflag</param>
         /// <returns></returns>
-        private static int[] ToSortedDamages(this int[] damages, int[] dfList)
+        private static int[] ToFriendDamages(this int[] damages, int[] dfList, int[] efList)
         {
-            var zip = damages.Zip(dfList, (da, df) => new {df, da});
-            var ret = new int[12];
-            foreach (var d in zip.Where(d => 0 < d.df))
+            return SelectDamages(damages, dfList, efList, i => i != 0);
+        }
+        private static int[] ToEnemyDamages(this int[] damages, int[] dfList, int[] efList)
+        {
+            return SelectDamages(damages, dfList, efList, i => i == 0);
+        }
+        private static int[] SelectDamages(int[] damages, int[] dfList, int[] efList, Func<int, bool> op)
+        {
+            var zip1 = dfList.Zip(efList, (df, ef) => new { df, ef });
+            var zip2 = damages.Zip(zip1, (da, a) => new { a.df, a.ef, da });
+            var ret = new int[6];
+            foreach (var d in zip2.Where(d => op(d.ef)))
             {
-                ret[d.df - 1] += d.da;
+                ret[d.df] += d.da;
             }
             return ret;
         }
 
         #endregion
 
+        public static T SafeAccess<T>(this T[] array, int index, T defaultValue)
+        {
+            if (index >= 0 && array?.Length > index)
+            {
+                return array[index];
+            } else
+            {
+                return defaultValue;
+            }
+        }
         #endregion
     }
 }

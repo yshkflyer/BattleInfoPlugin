@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using BattleInfoPlugin.Models.Raw;
 
 namespace BattleInfoPlugin.Models
 {
@@ -46,15 +47,15 @@ namespace BattleInfoPlugin.Models
         {
             if (damages == null) throw new ArgumentNullException();
             var arr = damages.ToArray();
-            if (arr.Length != 6) throw new ArgumentException("艦隊ダメージ配列の長さは6である必要があります。");
+            // if (arr.Length != 6) throw new ArgumentException("艦隊ダメージ配列の長さは6である必要があります。");
             return new FleetDamages
             {
-                Ship1 = arr[0],
-                Ship2 = arr[1],
-                Ship3 = arr[2],
-                Ship4 = arr[3],
-                Ship5 = arr[4],
-                Ship6 = arr[5],
+                Ship1 = arr.SafeAccess(0, 0),
+                Ship2 = arr.SafeAccess(1, 0),
+                Ship3 = arr.SafeAccess(2, 0),
+                Ship4 = arr.SafeAccess(3, 0),
+                Ship5 = arr.SafeAccess(4, 0),
+                Ship6 = arr.SafeAccess(5, 0),
             };
         }
     }

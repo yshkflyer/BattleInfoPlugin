@@ -230,10 +230,10 @@ namespace BattleInfoPlugin.Models
 
 
             proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_map/start")
-                .TryParse<map_start_next>().Subscribe(x => this.UpdateFleetsByStartNext(x.Data, x.Request["api_deck_id"]));
+                .TryParse<map_next>().Subscribe(x => this.UpdateFleetsByStartNext(x.Data, x.Request["api_deck_id"]));
 
             proxy.ApiSessionSource.Where(x => x.Request.PathAndQuery == "/kcsapi/api_req_map/next")
-                .TryParse<map_start_next>().Subscribe(x => this.UpdateFleetsByStartNext(x.Data));
+                .TryParse<map_next>().Subscribe(x => this.UpdateFleetsByStartNext(x.Data));
 
         }
 
@@ -244,8 +244,10 @@ namespace BattleInfoPlugin.Models
             this.Name = "通常 - 夜戦";
 
             this.UpdateFleets(data.api_deck_id, data);
-            this.UpdateMaxHP(data.api_maxhps);
-            this.UpdateNowHP(data.api_nowhps);
+            this.UpdateFriendMaxHP(data.api_f_maxhps);
+            this.UpdateEnemyMaxHP(data.api_e_maxhps);
+            this.UpdateFriendNowHP(data.api_f_nowhps);
+            this.UpdateEnemyNowHP(data.api_e_nowhps);
 
             this.FirstFleet.CalcDamages(data.api_hougeki.GetFriendDamages());
 
@@ -257,8 +259,10 @@ namespace BattleInfoPlugin.Models
             this.Name = "通常 - 開幕夜戦";
 
             this.UpdateFleets(data.api_deck_id, data, data.api_formation);
-            this.UpdateMaxHP(data.api_maxhps);
-            this.UpdateNowHP(data.api_nowhps);
+            this.UpdateFriendMaxHP(data.api_f_maxhps);
+            this.UpdateEnemyMaxHP(data.api_e_maxhps);
+            this.UpdateFriendNowHP(data.api_f_nowhps);
+            this.UpdateEnemyNowHP(data.api_e_nowhps);
 
             this.FirstFleet.CalcDamages(data.api_hougeki.GetFriendDamages());
 
@@ -272,8 +276,10 @@ namespace BattleInfoPlugin.Models
             this.Name = "連合艦隊 - 航空戦 - 昼戦";
 
             this.UpdateFleets(data.api_deck_id, data, data.api_formation);
-            this.UpdateMaxHP(data.api_maxhps, data.api_maxhps_combined);
-            this.UpdateNowHP(data.api_nowhps, data.api_nowhps_combined);
+            this.UpdateFriendMaxHP(data.api_f_maxhps, data.api_maxhps_combined);
+            this.UpdateEnemyMaxHP(data.api_e_maxhps);
+            this.UpdateFriendNowHP(data.api_f_nowhps, data.api_nowhps_combined);
+            this.UpdateEnemyNowHP(data.api_e_nowhps);
 
             this.FirstFleet.CalcDamages(
                 data.api_kouku.GetFirstFleetDamages(),
@@ -303,8 +309,10 @@ namespace BattleInfoPlugin.Models
             this.Name = "連合艦隊 - 機動部隊 - 昼戦";
 
             this.UpdateFleets(data.api_deck_id, data, data.api_formation);
-            this.UpdateMaxHP(data.api_maxhps, data.api_maxhps_combined);
-            this.UpdateNowHP(data.api_nowhps, data.api_nowhps_combined);
+            this.UpdateFriendMaxHP(data.api_f_maxhps, data.api_maxhps_combined);
+            this.UpdateEnemyMaxHP(data.api_e_maxhps);
+            this.UpdateFriendNowHP(data.api_f_nowhps, data.api_nowhps_combined);
+            this.UpdateEnemyNowHP(data.api_e_nowhps);
 
             this.FirstFleet.CalcDamages(
                 data.api_kouku.GetFirstFleetDamages(),
@@ -342,8 +350,10 @@ namespace BattleInfoPlugin.Models
             this.Name = "連合艦隊 - 水上部隊 - 昼戦";
 
             this.UpdateFleets(data.api_deck_id, data, data.api_formation);
-            this.UpdateMaxHP(data.api_maxhps, data.api_maxhps_combined);
-            this.UpdateNowHP(data.api_nowhps, data.api_nowhps_combined);
+            this.UpdateFriendMaxHP(data.api_f_maxhps, data.api_maxhps_combined);
+            this.UpdateEnemyMaxHP(data.api_e_maxhps);
+            this.UpdateFriendNowHP(data.api_f_nowhps, data.api_nowhps_combined);
+            this.UpdateEnemyNowHP(data.api_e_nowhps);
 
             this.FirstFleet.CalcDamages(
                 data.api_kouku.GetFirstFleetDamages(),
@@ -381,8 +391,10 @@ namespace BattleInfoPlugin.Models
             this.Name = "連合艦隊 - 夜戦";
 
             this.UpdateFleets(data.api_deck_id, data);
-            this.UpdateMaxHP(data.api_maxhps, data.api_maxhps_combined);
-            this.UpdateNowHP(data.api_nowhps, data.api_nowhps_combined);
+            this.UpdateFriendMaxHP(data.api_f_maxhps, data.api_maxhps_combined);
+            this.UpdateEnemyMaxHP(data.api_e_maxhps);
+            this.UpdateFriendNowHP(data.api_f_nowhps, data.api_nowhps_combined);
+            this.UpdateEnemyNowHP(data.api_e_nowhps);
 
             this.SecondFleet.CalcDamages(data.api_hougeki.GetFriendDamages());
 
@@ -394,8 +406,10 @@ namespace BattleInfoPlugin.Models
             this.Name = "連合艦隊 - 開幕夜戦";
 
             this.UpdateFleets(data.api_deck_id, data, data.api_formation);
-            this.UpdateMaxHP(data.api_maxhps, data.api_maxhps_combined);
-            this.UpdateNowHP(data.api_nowhps, data.api_nowhps_combined);
+            this.UpdateFriendMaxHP(data.api_f_maxhps, data.api_maxhps_combined);
+            this.UpdateEnemyMaxHP(data.api_e_maxhps);
+            this.UpdateFriendNowHP(data.api_f_nowhps, data.api_nowhps_combined);
+            this.UpdateEnemyNowHP(data.api_e_nowhps);
 
             this.SecondFleet.CalcDamages(data.api_hougeki.GetFriendDamages());
 
@@ -410,9 +424,11 @@ namespace BattleInfoPlugin.Models
 
             this.Name = "演習 - 昼戦";
 
-            this.UpdateFleets(data.api_dock_id, data, data.api_formation);
-            this.UpdateMaxHP(data.api_maxhps);
-            this.UpdateNowHP(data.api_nowhps);
+            this.UpdateFleets(data.api_deck_id, data, data.api_formation);
+            this.UpdateFriendMaxHP(data.api_f_maxhps);
+            this.UpdateEnemyMaxHP(data.api_e_maxhps);
+            this.UpdateFriendNowHP(data.api_f_nowhps);
+            this.UpdateEnemyNowHP(data.api_e_nowhps);
 
             this.FirstFleet.CalcPracticeDamages(
                 data.api_kouku.GetFirstFleetDamages(),
@@ -442,8 +458,10 @@ namespace BattleInfoPlugin.Models
             this.Name = "演習 - 夜戦";
 
             this.UpdateFleets(data.api_deck_id, data);
-            this.UpdateMaxHP(data.api_maxhps);
-            this.UpdateNowHP(data.api_nowhps);
+            this.UpdateFriendMaxHP(data.api_f_maxhps);
+            this.UpdateEnemyMaxHP(data.api_e_maxhps);
+            this.UpdateFriendNowHP(data.api_f_nowhps);
+            this.UpdateEnemyNowHP(data.api_e_nowhps);
 
             this.FirstFleet.CalcPracticeDamages(data.api_hougeki.GetFriendDamages());
 
@@ -454,9 +472,11 @@ namespace BattleInfoPlugin.Models
         {
             this.Name = "航空戦 - 昼戦";
 
-            this.UpdateFleets(data.api_dock_id, data, data.api_formation);
-            this.UpdateMaxHP(data.api_maxhps);
-            this.UpdateNowHP(data.api_nowhps);
+            this.UpdateFleets(data.api_deck_id, data, data.api_formation);
+            this.UpdateFriendMaxHP(data.api_f_maxhps);
+            this.UpdateEnemyMaxHP(data.api_e_maxhps);
+            this.UpdateFriendNowHP(data.api_f_nowhps);
+            this.UpdateEnemyNowHP(data.api_e_nowhps);
 
             this.FirstFleet.CalcDamages(
                 data.api_kouku.GetFirstFleetDamages(),
@@ -480,9 +500,11 @@ namespace BattleInfoPlugin.Models
         {
             this.Name = "通常 - 昼戦";
 
-            this.UpdateFleets(data.api_dock_id, data, data.api_formation);
-            this.UpdateMaxHP(data.api_maxhps);
-            this.UpdateNowHP(data.api_nowhps);
+            this.UpdateFleets(data.api_deck_id, data, data.api_formation);
+            this.UpdateFriendMaxHP(data.api_f_maxhps);
+            this.UpdateEnemyMaxHP(data.api_e_maxhps);
+            this.UpdateFriendNowHP(data.api_f_nowhps);
+            this.UpdateEnemyNowHP(data.api_e_nowhps);
 
             this.FirstFleet.CalcDamages(
                 data.api_kouku.GetFirstFleetDamages(),
@@ -513,9 +535,11 @@ namespace BattleInfoPlugin.Models
         {
             this.Name = "空襲戦 - 昼戦";
 
-            this.UpdateFleets(data.api_dock_id, data, data.api_formation);
-            this.UpdateMaxHP(data.api_maxhps);
-            this.UpdateNowHP(data.api_nowhps);
+            this.UpdateFleets(data.api_deck_id, data, data.api_formation);
+            this.UpdateFriendMaxHP(data.api_f_maxhps);
+            this.UpdateEnemyMaxHP(data.api_e_maxhps);
+            this.UpdateFriendNowHP(data.api_f_nowhps);
+            this.UpdateEnemyNowHP(data.api_e_nowhps);
 
             this.FirstFleet.CalcDamages(
                 data.api_kouku.GetFirstFleetDamages()
@@ -531,8 +555,10 @@ namespace BattleInfoPlugin.Models
             this.Name = "連合艦隊 - 空襲戦 - 昼戦";
 
             this.UpdateFleets(data.api_deck_id, data, data.api_formation);
-            this.UpdateMaxHP(data.api_maxhps, data.api_maxhps_combined);
-            this.UpdateNowHP(data.api_nowhps, data.api_nowhps_combined);
+            this.UpdateFriendMaxHP(data.api_f_maxhps, data.api_maxhps_combined);
+            this.UpdateEnemyMaxHP(data.api_e_maxhps);
+            this.UpdateFriendNowHP(data.api_f_nowhps, data.api_nowhps_combined);
+            this.UpdateEnemyNowHP(data.api_e_nowhps);
 
             this.FirstFleet.CalcDamages(
                 data.api_kouku.GetFirstFleetDamages()
@@ -554,7 +580,7 @@ namespace BattleInfoPlugin.Models
             this.DropShipName = data.api_get_ship?.api_ship_name;
         }
 
-        private void UpdateFleetsByStartNext(map_start_next startNext, string api_deck_id = null)
+        private void UpdateFleetsByStartNext(map_next startNext, string api_deck_id = null)
         {
             this.Clear();
 
@@ -606,22 +632,28 @@ namespace BattleInfoPlugin.Models
                 FleetType.Second);
         }
 
-        private void UpdateMaxHP(int[] api_maxhps, int[] api_maxhps_combined = null)
+        private void UpdateFriendMaxHP(int[] api_maxhps, int[] api_maxhps_combined = null)
         {
-            this.FirstFleet.Ships.SetValues(api_maxhps.GetFriendData(), (s, v) => s.MaxHP = v);
-            this.Enemies.Ships.SetValues(api_maxhps.GetEnemyData(), (s, v) => s.MaxHP = v);
+            this.FirstFleet.Ships.SetValues(api_maxhps, (s, v) => s.MaxHP = v);
 
             if (api_maxhps_combined == null) return;
-            this.SecondFleet.Ships.SetValues(api_maxhps_combined.GetFriendData(), (s, v) => s.MaxHP = v);
+            this.SecondFleet.Ships.SetValues(api_maxhps_combined, (s, v) => s.MaxHP = v);
+        }
+        private void UpdateEnemyMaxHP(int[] api_maxhps, int[] api_maxhps_combined = null)
+        {
+            this.Enemies.Ships.SetValues(api_maxhps, (s, v) => s.MaxHP = v);
         }
 
-        private void UpdateNowHP(int[] api_nowhps, int[] api_nowhps_combined = null)
+        private void UpdateFriendNowHP(int[] api_nowhps, int[] api_nowhps_combined = null)
         {
-            this.FirstFleet.Ships.SetValues(api_nowhps.GetFriendData(), (s, v) => s.NowHP = v);
-            this.Enemies.Ships.SetValues(api_nowhps.GetEnemyData(), (s, v) => s.NowHP = v);
+            this.FirstFleet.Ships.SetValues(api_nowhps, (s, v) => s.NowHP = v);
 
             if (api_nowhps_combined == null) return;
-            this.SecondFleet.Ships.SetValues(api_nowhps_combined.GetFriendData(), (s, v) => s.NowHP = v);
+            this.SecondFleet.Ships.SetValues(api_nowhps_combined, (s, v) => s.NowHP = v);
+        }
+        private void UpdateEnemyNowHP(int[] api_nowhps, int[] api_nowhps_combined = null)
+        {
+            this.Enemies.Ships.SetValues(api_nowhps, (s, v) => s.NowHP = v);
         }
 
         private void Clear()

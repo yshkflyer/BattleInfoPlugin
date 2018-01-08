@@ -16,7 +16,7 @@ namespace BattleInfoPlugin.Models.Repositories
         
         private int previousCellNo;
         
-        private map_start_next currentStartNext;
+        private map_next currentStartNext;
 
         private member_mapinfo[] currentMapInfos;
 
@@ -42,12 +42,12 @@ namespace BattleInfoPlugin.Models.Repositories
             this.currentMapInfos = mapinfos;
         }
 
-        public void UpdateMapData(map_start_next startNext)
+        public void UpdateMapData(map_next next)
         {
-            this.currentStartNext = startNext;
+            this.currentStartNext = next;
 
-            this.UpdateMapRoute(startNext);
-            this.UpdateMapCellData(startNext);
+            this.UpdateMapRoute(next);
+            this.UpdateMapCellData(next);
 
             this.EnemyData.Save();
         }
@@ -142,11 +142,27 @@ namespace BattleInfoPlugin.Models.Repositories
                 .Select((x, i) =>
                 {
                     var param = this.EnemyData.EnemyParams.ContainsKey(enemyId) ? this.EnemyData.EnemyParams[enemyId][i] : new[] { -1, -1, -1, -1 };
-                    var upgrades = this.EnemyData.EnemyUpgraded.ContainsKey(enemyId) ? this.EnemyData.EnemyUpgraded[enemyId][i] : new[] { 0, 0, 0, 0 };
+                    var upgrades = this.EnemyData.EnemyUpgraded.ContainsKey(enemyId) ? this.EnemyData.EnemyUpgraded[enemyId].SafeAccess(i, new[] { 0, 0, 0, 0 }) : new[] { 0, 0, 0, 0 };
                     param = param.Zip(upgrades, (p, u) => p + u).ToArray();
-                    var lv = this.EnemyData.EnemyLevels.ContainsKey(enemyId) ? this.EnemyData.EnemyLevels[enemyId][i + 1] : -1;
-                    var hp = this.EnemyData.EnemyHPs.ContainsKey(enemyId) ? this.EnemyData.EnemyHPs[enemyId][i] : -1;
-                    return new MastersShipData(shipInfos[x])
+                    var lv = this.EnemyData.EnemyLevels.ContainsKey(enemyId) ? this.EnemyData.EnemyLevels[enemyId].SafeAccess(i + 1, -1) : -1;
+                    var hp = this.EnemyData.EnemyHPs.ContainsKey(enemyId) ? this.EnemyData.EnemyHPs[enemyId].SafeAccess(i, -1) : -1;
+                    return shipInfos[x] != null ? new MastersShipData(shipInfos[x])
+                    {
+                        Level = lv,
+                        NowHP = hp,
+                        MaxHP = hp,
+                        Firepower = param[0],
+                        Torpedo = param[1],
+                        AA = param[2],
+                        Armer = param[3],
+                        Slots = this.EnemyData.EnemySlotItems.ContainsKey(enemyId)
+                            ? this.EnemyData.EnemySlotItems[enemyId][i]
+                                .Where(s => s != -1)
+                                .Select(s => slotInfos[s])
+                                .Select((s, si) => new ShipSlotData(s))
+                                .ToArray()
+                            : new ShipSlotData[0],
+                    } : new MastersShipData()
                     {
                         Level = lv,
                         NowHP = hp,
@@ -188,7 +204,7 @@ namespace BattleInfoPlugin.Models.Repositories
             this.EnemyData.EnemyEncounterRank[enemyId].Add(rank);
         }
 
-        private void UpdateMapRoute(map_start_next startNext)
+        private void UpdateMapRoute(map_next startNext)
         {
             var mapInfo = GetMapInfo(startNext);
             if (!this.EnemyData.MapRoute.ContainsKey(mapInfo))
@@ -199,7 +215,7 @@ namespace BattleInfoPlugin.Models.Repositories
             this.previousCellNo = 0 < startNext.api_next ? startNext.api_no : 0;
         }
 
-        private void UpdateMapCellData(map_start_next startNext)
+        private void UpdateMapCellData(map_next startNext)
         {
             var mapInfo = GetMapInfo(startNext);
             if (!this.EnemyData.MapCellDatas.ContainsKey(mapInfo))
@@ -229,7 +245,7 @@ namespace BattleInfoPlugin.Models.Repositories
             this.EnemyData.MapCellDatas[mapInfo].Add(mapCellData);
         }
 
-        private static int GetMapInfo(map_start_next startNext)
+        private static int GetMapInfo(map_next startNext)
         {
             return Master.Current.MapInfos
                 .Select(x => x.Value)
@@ -284,7 +300,7 @@ namespace BattleInfoPlugin.Models.Repositories
             else
                 this.EnemyData.EnemyLevels.Add(enemyId, api_ship_lv);
 
-            var hps = api_maxhps.GetEnemyData().ToArray();
+            var hps = api_maxhps;
             if (this.EnemyData.EnemyHPs.ContainsKey(enemyId))
                 this.EnemyData.EnemyHPs[enemyId] = hps;
             else

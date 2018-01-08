@@ -68,7 +68,6 @@ namespace BattleInfoPluginTest
         {
             var dam = new object[]
             {
-                -1,
                 new[] {134},
                 new[] {30},
                 new[] {239},
@@ -79,16 +78,25 @@ namespace BattleInfoPluginTest
             };
             var df = new object[]
             {
-                -1,
-                new[] {11},
                 new[] {5},
-                new[] {8},
                 new[] {5},
-                new[] {12},
                 new[] {2},
-                new[] {9, 9},
+                new[] {5},
+                new[] {6},
+                new[] {2},
+                new[] {3, 3},
             };
-            var firend = dam.GetFriendDamages(df);
+            var ef = new int[]
+            {
+                0,
+                1,
+                0,
+                1,
+                0,
+                1,
+                0,
+            };
+            var firend = dam.GetFriendDamages(df, ef);
             firend.ToArray().Is(new int[]
             {
                 0,
@@ -98,7 +106,7 @@ namespace BattleInfoPluginTest
                 39,
                 0,
             });
-            var enemies = dam.GetEnemyDamages(df);
+            var enemies = dam.GetEnemyDamages(df, ef);
             enemies.ToArray().Is(new int[]
             {
                 0,

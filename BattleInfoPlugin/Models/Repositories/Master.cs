@@ -6,6 +6,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Grabacr07.KanColleWrapper.Models.Raw;
+using BattleInfoPlugin.Models.Raw;
 using BattleInfoPlugin.Properties;
 using System.IO;
 using System.Runtime.Serialization.Json;
@@ -57,10 +58,17 @@ namespace BattleInfoPlugin.Models.Repositories
         {
             var areas = start2.api_mst_maparea.Select(x => new MapArea(x)).ToDictionary(x => x.Id, x => x);
             var infos = start2.api_mst_mapinfo.Select(x => new MapInfo(x)).ToDictionary(x => x.Id, x => x);
-            var cells = start2.api_mst_mapcell.Select(x => new MapCell(x)).ToDictionary(x => x.Id, x => x);
+//            var cells = start2.api_mst_mapcell.Select(x => new MapCell(x)).ToDictionary(x => x.Id, x => x);
 
             foreach (var key in areas.Keys) this.MapAreas.AddOrUpdate(key, areas[key], (k, v) => areas[k]);
             foreach (var key in infos.Keys) this.MapInfos.AddOrUpdate(key, infos[key], (k, v) => infos[k]);
+//            foreach (var key in cells.Keys) this.MapCells.AddOrUpdate(key, cells[key], (k, v) => cells[k]);
+
+            this.Serialize(Settings.Default.MasterDataFileName);
+        }
+        public void Update(map_start start)
+        {
+            var cells = start.api_cell_data.Select(x => new MapCell(start, x)).ToDictionary(x => x.Id, x => x);
             foreach (var key in cells.Keys) this.MapCells.AddOrUpdate(key, cells[key], (k, v) => cells[k]);
 
             this.Serialize(Settings.Default.MasterDataFileName);
@@ -76,7 +84,7 @@ namespace BattleInfoPlugin.Models.Repositories
         //            target.Add(sourceKey, source[sourceKey]);
         //    }
         //}
-        
+
         public Task<bool> Merge(string path)
         {
             return Task.Run(() =>

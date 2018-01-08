@@ -3,7 +3,7 @@
     
 
 
-    public class map_start_next
+    public class map_next
     {
         public int api_rashin_flg { get; set; }
         public int api_rashin_id { get; set; }
@@ -28,6 +28,10 @@
         public Api_Itemget api_itemget { get; set; }
         public Api_Select_Route api_select_route { get; set; }
         public int api_ration_flag { get; set; }
+    }
+    public class map_start : map_next
+    {
+        public Api_Cell_Data[] api_cell_data { get; set; }
     }
 
     public class Api_Airsearch
@@ -77,6 +81,14 @@
     public class Api_Select_Route
     {
         public int[] api_select_cells { get; set; }
+    }
+
+    public class Api_Cell_Data
+    {
+        public int api_color_no { get; set; }
+        public int api_id { get; set; }
+        public int api_no { get; set; }
+        public int api_passed { get; set; }
     }
 
 }
